@@ -1,0 +1,282 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find &amp; Replace Extension</title>
+  <link rel="icon" type="image/png" href="images/icon32.png" />
+
+  <style>
+    body { background: #ECEFF1; color: rgba(0,0,0,0.85); font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+    #message { background: white; max-width: 600px; margin: 50px auto 16px; padding: 32px 24px; border-radius: 3px; }
+    #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+    #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+    #message h3 { font-weight: bold; font-size: 18px; margin: 35px 0 5px; }
+    #message h4 { font-weight: bold; font-size: 15px; margin: 25px 0 3px; }
+    #message h3 + h4 { margin-top: 10px; }
+    #message .lead-para { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
+    #message .para { line-height: 140%; margin: 5px 0 10px; font-size: 14px; text-align: justify; }
+    a { text-decoration: none; color: #1565C0; font-weight: bold; }
+    a:hover, a:active { color: #2196F3; }
+    #message { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+    #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+    kbd {
+      display: inline-block;
+      margin: 0 .1em;
+      padding: .1em .6em;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #242729;
+      text-shadow: 0 1px 0 #FFF;
+      background-color: #e1e3e5;
+      border: 1px solid #adb3b9;
+      border-radius: 3px;
+      box-shadow: 0 1px 0 rgba(12,13,14,0.2),0 0 0 2px #FFF inset;
+      white-space: nowrap;
+    }
+    img {
+      border-radius: 3px;
+      display: block;
+    }
+    img.framed {
+      border: 1px dotted black;
+    }
+    .img-row, .img-one {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    .img-row > img, .img-one > img {
+      display: inline-block;
+      max-width: 101%;
+    }
+    .img-row > img {
+      margin: 10px;
+    }
+    .img-one {
+      padding: 10px;
+    }
+    .arrow-next {
+      height: 25px;
+    }
+    em {
+      font-weight: bold;
+    }
+    @media (max-width: 600px) {
+      body, #message { margin-top: 0; background: white; box-shadow: none; }
+      body { border-top: 16px solid #ffa100; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="message">
+    <h2>Welcome to Find &amp; Replace</h2>
+    <h1>Help Text &amp; User Guide</h1>
+    <div class="lead-para">Find &amp; Replace for Text Editing is a browser extension that allows
+      you to search &amp; replace text in input fields and editable text content directly in
+      your browser. <br /><br />
+      Visit the <a href="https://www.findreplace.us/">Official Website</a> to
+      submit feedback or find more information.<br />
+      We collect anonymous usage statistics to help improve the extension in the future.
+      If you do not want to participate, follow the <a href="#s8-2">opt-out instructions</a>.
+    </div>
+    <h3 id="s1">1. Basic Usage</h3>
+    <h4 id="s1-1">1.1. Selecting Target Text Area (optional)</h4>
+    <div class="para">
+      Before you open the extension, you should select the input area where you want to perform the
+      search &amp; replace operation. By default, this extension works with any kind of <em>multi-line input
+        area</em> (see link on how to <a href="#s4-3">include single-line inputs</a> in search).<br /><br />
+      By default, the extension will select all text areas at once and perform the search across
+      all of them. If however, you want to limit the search to a single input area, simply click
+      inside it, before moving on to the <a href="#s1-2">next step</a>. If you have been typing
+      text, it is already selected.
+    </div>
+    <h4 id="s1-2">1.2. Opening the Search Widget</h4>
+    <div class="para">
+      To launch the extension click on the icon that was added to your browser toolbar.
+      <div class="img-row">
+        <img class="framed" src="images/help/launch.png" />
+        <img class="arrow-next" src="images/help/arrow-next.png" />
+        <img src="images/icon32.png" />
+      </div>
+      You can also press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>
+      (Mac: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) to achieve the same effect,
+      as long as there is no other browser extension using that shortcut.<br /><br />
+      After opening the search widget, input areas selected in the <a href="#s1-1">previous step</a>
+      (or by default all of them) should be indicated by showing a glowing outline.
+    </div>
+    <h4 id="s1-3">1.3. Finding Text</h4>
+    <div class="para">
+      After you open the search widget, you are presented with the following interface. If your status text
+      indicates <em>No Target</em> (instead of <em>No Results</em>), see section <a href="#s1-1">1.1.
+        Selecting Target Text Area</a>.
+      <div class="img-one">
+        <img src="images/help/find-initial.png" />
+      </div>
+      You can start typing your search query into the <em>Find input field</em>, the text search
+      results will be continuously updated as you type. You can see the total number of found occurrences
+      as well as the current occurrence index in the status text. 
+      <div class="img-one">
+        <img src="images/help/find-basic.png" />
+      </div>
+      All search results are highlighted directly in your webpage. The currently selected match is
+      highlighted in different color. Click the <em>Up and Down</em> buttons to move the currently selected match
+      to a match with a higher or lower index.
+      <div class="img-one">
+        <img src="images/help/highlighting.png" />
+      </div>
+      When you click the <em>Replace</em> button, the currently selected match is replaced with the text in
+      your <em>Replace input field</em>. You can also click <em>Replace all</em> to replace all occurrences at once.
+    </div>
+    <h3 id="s2">2. Keyboard shortcuts</h3>
+    <div class="para">
+      <ul>
+        <li><strong>Next match</strong> - Press <kbd>Enter</kbd> inside <em>Find input field</em>.</li>
+        <li><strong>Previous match</strong> - Press <kbd>Shift</kbd>+<kbd>Enter</kbd> inside <em>Find input field</em>.</li>
+        <li><strong>Replace</strong> - Press <kbd>Enter</kbd> inside <em>Replace input field</em>.</li>
+        <li><strong>Replace all</strong> - Press <kbd>Shift</kbd>+<kbd>Enter</kbd> inside <em>Replace input field</em>.</li>
+      </ul>
+    </div>
+    <h3 id="s3">3. Search Options</h3>
+    <div class="para">
+      <ul>
+        <li><strong>Match Case</strong> - Indicates whether to search case sensitive. With this option
+          turned on, the term <i>Cat</i> would only match <i>Cat</i> but not <i>cat</i> or <i>CAT</i> for
+          instance.</li>
+        <li><strong>Whole Words</strong> - When searching for an expression only those exact words with
+          a word boundary will be marked. For instance, when searching for <i>auto</i> with this option
+          turned on, <i>automobile</i> would not match, only <i>auto</i> on its own would.</li>
+        <li><strong>Advanced Search</strong> - Expands advanced search options - see <a href="#s4">Advanced Search</a>.</li>
+      </ul>
+    </div>
+    <h3 id="s4">4. Advanced Search</h3>
+    <h4 id="s4-1">4.1. Limiting Search to Text Selection</h4>
+    <div class="para">
+      Before being able to use the <em>In Text Selection</em> option, there must be a piece of text in
+      your webpage that is currently selected (inside an input area). Once you have an active text selection,
+      <a href="#s1-2">open your search widget</a> as usual (both clicking the icon and using keyboard shortcut
+      preserve your text selection). Now your search matches will be restricted to your text selection.
+    </div>
+    <h4 id="s4-2">4.2. Using RegEx</h4>
+    <div class="para">
+      By turning on the <em>Use RegEx</em> option, the search will treat your search query text
+      as a <a href="https://en.wikipedia.org/wiki/Regular_expression">regular expression</a>. It will
+      also enable you to see additional regex information relevant to your current match.<br /><br />
+
+      You can replace parts of a regular expression with <em>capture groups</em>. You reference these capture
+      groups in the <em>Replace input field</em> using the format <em>$n</em> (where n is a positive
+      integer referring to the n-th capture group). You can also use <em>$0</em> or <em>$&amp;</em> to
+      reference the whole matched string.
+      <div class="img-one">
+        <img src="images/help/regex-demo.png" />
+      </div>
+      For example, the expression <strong>(\d*)/\d*/(\d{4})</strong> matches dates such as 3/8/2015.
+      This expression has two capture groups: <strong>(\d*)</strong> matches the month
+      and <strong>(\d{4})</strong> matches the year. <br />
+      To replace each date matched with the above regular expression to the first date of the month,
+      you would use the string <strong>$1/1/$2</strong>. The date 3/8/2015 would be replaced with 3/1/2015.
+    </div>
+    <h4 id="s4-3">4.3. Enabling Single-Line Inputs</h4>
+    <div class="para">
+      By default, this extension works with any kind of input area that spans multiple lines. This was
+      an intentional design decision as having to search and replace text in single-line inputs is a quite
+      rare use case.<br /><br />
+
+      If you wish to do so, you can still include single-line inputs in your search by turning on the
+      <em>Include Single-Line Inputs</em> option in the advanced search options.
+    </div>
+    <h3 id="s5">5. Using Favourites</h3>
+    <div class="para">
+      You can save search queries that you commonly perform to your Favourites list. When you have your
+      search widget input fields set to certain values, you can click the star icon to save this search
+      to your favourites.
+      <div class="img-row">
+        <img src="images/help/fav-step-1.png" />
+        <img class="arrow-next" src="images/help/arrow-next.png" />
+        <img src="images/help/fav-step-2.png" />
+      </div>
+      <div class="img-one">
+        <img src="images/help/fav-step-3.png" />
+      </div>
+      You can access your list of favourites using the right panel menu. By clicking on one of the items in
+      the list you can restore your search input settings and perform the same search again. Note that this
+      will only perform the search, but not the actual replace operation.
+    </div>
+    <h3 id="s6">6. Using History</h3>
+    <div class="para">
+      The extension automatically stores the history of your previous searches. A new history entry is
+      only created when you perform at least one replace operation for the given search term.
+      <div class="img-one">
+        <img src="images/help/history.png" />
+      </div>
+      You can access your history using the right panel menu. By clicking on one of the items in
+      the list you can restore your search input settings and perform the same search again. Note that this
+      will only perform the search, but not the actual replace operation.
+    </div>
+    <h3 id="s7">7. Using Templates</h3>
+    <div class="para">
+      Templates allow you to define a piece of text that you can later paste into your active input area.
+      This could be your signature, a commonly used email response, or any other piece of text that you
+      are going to reuse often.<br /><br />
+
+      For this feature to work, you must first place your cursor into one specific input area on your page.
+      The position of the cursor is important as it will indicate a position where the template is going
+      to be inserted. If you instead select a piece of text with your cursor, the template will be inserted
+      in the place of the selection as a replacement.
+      <div class="img-one">
+        <img src="images/help/templates.png" />
+      </div>
+      You can access your templates using the right panel menu. By clicking on one of the items in
+      the list you can perform the template insertion. You create new templates by clicking on the
+      <em>Create New</em> button. Here you can also edit or remove existing templates
+      by clicking on the edit icons next to each list item. Note that you can edit your templates
+      anytime, even when you don't have an active input area selected.
+    </div>
+    <h3 id="s8">8. Using the Help Panel</h3>
+    <h4 id="s8-1">8.1 Accessing the panel</h4>
+    <div class="para">
+      The help panel contains links to the official website, feedback forms, as well as a link to
+      this help text. You can access the help panel using the right panel menu.
+      <div class="img-one">
+        <img src="images/help/help-panel.png" />
+      </div>
+    </div>
+    <h4 id="s8-2">8.2 Turning off Analytics</h4>
+    <div class="para">
+      We collect anonymous usage statistics to help improve the extension in the future. These reports are
+      anonymized and contain information such as how frequently is the extension used, or which parts of
+      the extension's user interface and functionality are used more often than others.<br /><br />
+
+      We never collect your actual search queries or text that you are trying to find and replace. If you
+      would still like to opt-out, you can do so by clicking on the on/off toggle labeled
+      <em>Usage reporting</em> in the help panel.
+    </div>
+    <h3 id="s9">9. FAQ and Troubleshooting</h3>
+      <h4 id="s9-1">9.1. My status text indicates <i>No Target</i></h4>
+      <div class="para">
+        Make sure you have followed all the steps in section <a href="#s1-1">1.1. Selecting Target
+        Text Area</a>.<br />
+        If you are dealing with a single-line input area, refer to <a href="#s4-3">section 4.3.</a> to see
+        how to include single-line input areas in your search.
+        If your input area is still not recognized by the plugin, please submit feedback with
+        a link to the web page that was causing the trouble.
+      </div>
+      <h4 id="s9-2">9.2. My <i>In Text Selection</i> option has a red cross</h4>
+      <div class="para">
+        This indicates that you do not have a valid text selection that your search could be limited to.
+        See section <a href="#s4-1">4.1. Limiting Search to Text Selection</a>
+      </div>
+      <h4 id="s9-3">9.3. My <i>Find input field</i> has a red outline</h4>
+      <div class="para">
+        This is most likely caused by trying to use an invalid regular expression during regex search. Make
+        sure all your opening parentheses have a matching pair.
+      </div>
+    </div>
+  </div>
+  <p id="load">Visit the <a href="https://www.findreplace.us/">Official Website</a> to
+    submit feedback or find more information.</p>
+
+</body>
+</html>

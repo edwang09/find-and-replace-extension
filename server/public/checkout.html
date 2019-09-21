@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>checkout</title>
+</head>
+<body>
+    checking out ...
+</body>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    function getUrlVars() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+    }
+    console.log({
+        items: [{plan: 'plan_Fkbjssbtcmekw4', quantity: 1}],
+        successUrl: 'https://pay-gate-for-find-replace.firebaseapp.com',
+        cancelUrl: 'https://pay-gate-for-find-replace.firebaseapp.com',
+        clientReferenceId: getUrlVars().ref
+    })
+    var stripe = Stripe('pk_live_XqVbfPVyUwJ8UYXBphXstexz');
+    stripe.redirectToCheckout({
+    // items: [{sku: 'sku_Fi4IAqthDnX4G0', quantity: 1}],
+    items: [{plan: 'plan_Fkbjssbtcmekw4', quantity: 1}],
+    successUrl: 'https://pay-gate-for-find-replace.firebaseapp.com',
+    cancelUrl: 'https://pay-gate-for-find-replace.firebaseapp.com',
+    clientReferenceId: getUrlVars().ref
+    })
+    .then(function (result) {
+        console.log("done")
+    });
+</script>
+</html>

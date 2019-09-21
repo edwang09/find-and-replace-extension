@@ -1,0 +1,88 @@
+/* CSS injected into the currently active tab */
+
+.search-and-replace-area-glow {
+  box-shadow: 0 0 5px rgba(0, 90, 255, 0.9) !important;
+  outline: 1px solid rgba(0, 90, 255, 0.9) !important;
+}
+
+.hwt-mark-highlight {
+  border-radius: 1px;
+  background-color: #70CEF9;
+}
+.hwt-mark-highlight.hwt-highlight-current {
+  background-color: #ffa100;
+}
+
+/* jQuery Higlight Within Textarea */
+  .hwt-container {
+    display: inline-block;
+    position: relative;
+    overflow: hidden !important;
+    -webkit-text-size-adjust: none !important;
+    padding: 0 !important;
+  }
+
+  .hwt-backdrop {
+    position: absolute !important;
+    top: 0 !important;
+    right: -99px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    padding: 0 99px 0 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  /* <input type="text"> is vertically aligned */
+  .hwt-container.hwt-singleline .hwt-backdrop {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .hwt-highlights {
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    border-color: transparent !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    color: transparent !important;
+    overflow: hidden !important;
+  }
+
+  /* <input type="text"> is one line only */
+  .hwt-container.hwt-singleline .hwt-highlights {
+    white-space: nowrap !important;
+  }
+
+  .hwt-input {
+    display: block !important;
+    position: relative !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .hwt-content {
+    border-width: 1px;
+    border-style: solid;
+    background: none transparent !important;
+  }
+
+  .hwt-content mark {
+    padding: 0 !important;
+    color: inherit;
+  }
+
+/* Oh Snap */
+.alert {
+  text-align: right;
+  margin-top: 10px;
+  padding: 15px;
+  border: 1px solid #eed3d7;
+  border-radius: 4px;
+  float: right;
+  clear: right;
+  color: white;
+  background-color: #DA4453;
+}

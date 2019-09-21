@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thank you for trying Find &amp; Replace!</title>
+  <link rel="icon" type="image/png" href="icon32.png" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="message">
+    <h2>Thank you for using Find &amp; Replace</h2>
+    <h1>Why did you uninstall?</h1>
+    <textarea name="feedback" id="feedback-input" autofocus></textarea>
+    <p></p>
+    <a href="#" class="default-a" id='feedback-submit'>Send Feedback</a>
+  </div>
+  <p id="load">Your feedback helps us improve the product for everyone, thank you.</p>
+
+  <!-- Global Site Tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-82810279-3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-82810279-3');
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="./feedback.js"></script>
+  <script>
+		$(() => {
+      const $textarea = $('#feedback-input');
+      const $button = $('#feedback-submit');
+      submitFeedback($textarea, $button, '/submit-uninstall-feedback');
+		});
+	</script>
+</body>
+</html>
