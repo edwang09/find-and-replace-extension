@@ -8,45 +8,85 @@ class FavouritesPanel extends React.Component {
     super(props);
     this.state = {
       email : null,
-      allow : false,
+      premium : false,
+      bundleCreation : false,
+      checkedItem:[],
       redirecting:false
     }
     this.handleFavouriteRemoved = this.handleFavouriteRemoved.bind(this);
     this.handleFavouriteSelected = this.handleFavouriteSelected.bind(this);
-    this.handleMonthlyPay = this.handleMonthlyPay.bind(this);
+    this.handlePay = this.handlePay.bind(this);
     // this.handleYearlyPay = this.handleYearlyPay.bind(this);
     this.cancelPay = this.cancelPay.bind(this);
+    this.toggleBundleCreation = this.toggleBundleCreation.bind(this);
+    this.handleCheckbox = this.handleCheckbox.bind(this);
+    this.handleBundleCreation = this.handleBundleCreation.bind(this);
+    this.handleReplaceAll = this.handleReplaceAll.bind(this);
+    this.handleReplaceAllBundle = this.handleReplaceAllBundle.bind(this);
   }
   componentWillMount(){
     let self = this
-    chrome.storage.local.get(["subscribe"], data => {
-      this.setState({allow:data.subscribe})
+    console.log(this.props.favourites)
+   
+    chrome.storage.local.get(["premium"], data => {
+      this.setState({premium:data.premium})
     });
     window.chrome.identity.getProfileUserInfo(function(userInfo) {
       self.setState({email:userInfo.email})
-      fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/' + userInfo.email).then(r => r.json()).then(result => {
-          // Result now contains the response text, do what you want...
-          console.log(result)
-          if (result.exists && result.subscription){
-            self.setState({allow:true, subscription: result.subscription})
-            chrome.storage.local.set({"subscribe":true});
-          }else{
-            self.setState({allow:false})
-              chrome.storage.local.set({"subscribe":false});
-          }
-          console.log("email stored")
-      })
-      })
+      console.log("email:" + userInfo.email)
+      if (userInfo.email){
+        fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/checkpremium', {
+          method : "POST", 
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email: userInfo.email})})
+          .then(r => r.json()).then(result => {
+            // Result now contains the response text, do what you want...
+            console.log(result)
+            if (result.exists ){
+              self.setState({premium:true})
+              chrome.storage.local.set({"premium":true});
+            }else{
+              self.setState({premium:false})
+                chrome.storage.local.set({"premium":false});
+            }
+            console.log("email stored")
+        })
+      }else{
+        self.setState({premium:false})
+        chrome.storage.local.set({"premium":false});
+      }
+
+    })
  
   }
   handleFavouriteSelected(id) {
-    this.props.onFavouriteSelected(this.props.favourites[id]);
+    if(!this.state.bundleCreation){
+      this.props.onFavouriteSelected(this.props.favourites[id]);
+    }
+  }
+  handleReplaceAll(id){
+    if(!this.state.bundleCreation){
+      this.props.onReplaceAll(this.props.favourites[id]);
+    }
+  }
+
+  handleReplaceAllBundle(id){
+    if(!this.state.bundleCreation && this.props.favourites[id] && this.props.favourites[id].length>1){
+      this.props.favourites[id].map((fav)=>{
+        console.log(fav)
+        this.props.onReplaceAll(fav);
+      })
+    }
   }
 
   handleFavouriteRemoved(id) {
     Storage.setInFavourites(this.props.favourites[id], /* delete */ true);
   }
-  handleMonthlyPay(e){
+  handleunBundle(id){
+    console.log(this.props.favourites[id])
+    Storage.unbundleFavourites(this.props.favourites[id]);
+  }
+  handlePay(e){
     e.preventDefault()
     this.setState({redirecting:true})
     if (this.state.email && this.state.email !== ""){
@@ -75,58 +115,118 @@ class FavouritesPanel extends React.Component {
       })
     }
   }
+  toggleBundleCreation(e){
+    e.preventDefault()
+    console.log(this.state.bundleCreation)
+    this.setState({bundleCreation: !this.state.bundleCreation, checkedItem: Object.keys(this.props.favourites)
+      .filter(id=> id.substr(0,6)!=="bundle")
+      .map(id=>{
+      return false
+    })})
+  }
+
+  handleCheckbox(e) { 
+    const newCheckedItem = this.state.checkedItem.map((item, idx)=>{
+      if (idx == e.target.name){
+        return !item
+      }else{
+        return item
+      }
+    })
+    this.setState({checkedItem: newCheckedItem});
+  }
+  handleBundleCreation(e){
+    e.preventDefault()
+    console.log(this.state.checkedItem)
+    const bundlelist = Object.keys(this.props.favourites)
+    .filter(id=> id.substr(0,6)!=="bundle")
+    .sort()
+    .filter((id, idx)=>{
+      return this.state.checkedItem[idx]
+    })
+    console.log(bundlelist)
+    const bundle = bundlelist.map((id, idx)=>{
+      return this.props.favourites[id]
+    })
+    console.log(bundle)
+    if (bundle && bundle.length > 1){
+      Storage.bundleFavourites(bundle);
+      this.setState({bundleCreation: false})
+    }else{
+      this.setState({bundleCreation: false})
+    }
+  }
   render() {
     const noSavedFavouritesMessage = <div style={{ padding: '1em' }}>
         Currently you have no saved items.</div>;
     return (
       <div className="favourites-list">
-        <div className="panel-title"><FontAwesome name='star' fixedWidth={true} /> Favourites</div>
-        {(!this.state.email) && <p>Please login Chrome to enable this feature.</p>}
-        {(!this.state.allow && this.state.email) &&
+        <div className="panel-title">
+          <div><FontAwesome name='star' fixedWidth={true} /> Favourites</div>
           <div>
-          {!this.state.redirecting && <div>
-            <p className="pay-text">Upgrade your account to use this feature. Upgrade cost $3.99 per month.</p>
-            <button onClick={this.handleMonthlyPay} className="pay-button">Pay Monthly</button>
-            {/* <button onClick={this.handleYearlyPay} className="pay-button">Pay for a year</button> */}
-            </div>
-          }
-          {this.state.redirecting && <p className="pay-text">Redirecting to Checkout page please dont close extension ... </p>}
+            {this.state.premium && <button className="small-button" onClick={this.toggleBundleCreation}>{this.state.bundleCreation ? "Cancel" : "Choose items to bundle"}</button>}
+            {(this.state.premium && this.state.bundleCreation) && <button className="small-button small-button--red" onClick={this.handleBundleCreation}>Create bundle</button>}
           </div>
-        }
-        {/* {(this.state.allow && this.state.subscription) && 
-          <small className = "pay-info">
-            Current subscription ends at
-            {new Date(this.state.subscription.current_period_end*1000).toLocaleDateString("en-US")}, 
-            {this.state.subscription.cancel_at_period_end ? 
-            " subscription will not automatically renew." :
-            " automatically renew on next billing cycle."}
-            {!this.state.subscription.cancel_at_period_end && <span>
-            Click to 
-            <a onClick={this.cancelPay} href="#"> cancel subscription</a>
-            </span>}
-          </small>
-        } */}
-        {this.state.allow && <div>
+          {(!this.state.premium && this.state.email) && <p onClick={this.handlePay} className="leavereview">Upgrade to run multiple F&R queries with 1 click</p>}
+          {(!this.state.premium && !this.state.email) && <p className="logintext">Login Chrome to experience premuim features.</p>}
+        </div>
+        <div>
           {Object.keys(this.props.favourites).length == 0 && noSavedFavouritesMessage}
-          {Object.keys(this.props.favourites).sort().map(id => {
+          {this.state.premium && Object.keys(this.props.favourites).filter(id=> id.substr(0,6)==="bundle").sort().map((id, idx) => {
+              const textRender = this.props.favourites[id].map((item,idx)=>{
+                return (
+                    <span>
+                      <span>{item.findTextInput}</span>
+                      <FontAwesome name='long-arrow-right' /> 
+                      <span>{item.replaceTextInput} </span>
+                    </span>
+                    )
+              });
+              return (
+                <div className="favourites-list-item" key={id}
+                    onClick={() => this.handleFavouriteSelected(id)}>
+                  <span>
+                    <b>Bundle : </b>{textRender}
+                  </span>
+                  <span>
+                    {this.state.premium && <button className="small-button small-button--red" onClick={(e) => {
+                        e.stopPropagation();
+                        this.handleReplaceAllBundle(id);
+                      }}>Run</button>}
+                    <button className="small-button" onClick={(e) => {
+                        e.stopPropagation();
+                        this.handleunBundle(id);
+                      }}>Unbundle</button>
+                  </span>
+                </div>
+              );
+            }
+          )}
+          {Object.keys(this.props.favourites).filter(id=> id.substr(0,6)!=="bundle").sort().map((id, idx) => {
             const { findTextInput, replaceTextInput } = this.props.favourites[id];
-            return (
-              <div className="favourites-list-item" key={id}
-                  onClick={() => this.handleFavouriteSelected(id)}>
-                <span>
-                  <span>{findTextInput}</span> <FontAwesome name='long-arrow-right' /> <span>{replaceTextInput}</span>
-                </span>
-                <span>
-                  <FontAwesome className="favourites-list-item-remove" name='times'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      this.handleFavouriteRemoved(id);
-                    }} />
-                </span>
-              </div>
-            );
-          })}
-        </div>}
+              return (
+                <div className="favourites-list-item" key={id}
+                    onClick={() => this.handleFavouriteSelected(id)}>
+                  <span>
+                    {this.state.bundleCreation && <input type="checkbox" name={idx} checked={this.state.checkedItem[idx]} onChange={this.handleCheckbox}/>}
+                    <span>{findTextInput}</span> <FontAwesome name='long-arrow-right' /> <span>{replaceTextInput}</span>
+                  </span>
+                  <span>
+                    <button  className="small-button" onClick={(e) => {
+                        e.stopPropagation();
+                        this.handleReplaceAll(id);
+                      }}>Run</button>
+                    <FontAwesome className="favourites-list-item-remove" name='times'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        this.handleFavouriteRemoved(id);
+                      }} />
+                  </span>
+                </div>
+              );
+          }
+        )}
+        </div>
       </div>
     );
   }

@@ -76,7 +76,6 @@ app.post('/create', bodyParser.raw({type: '*/*'}),  (request, response) => {
               admin.database().ref("/subscription").push({
                   email: request.body.data.object.client_reference_id.toLowerCase(),
                   customer: request.body.data.object.customer,
-                  subscription: request.body.data.object.subscription,
                   timestamp: Date.now(),
                   data: request.body.data
                 })
@@ -144,7 +143,16 @@ app.get('/emaillist',basicAuth({
       .pipe(res);
     });
 });
-
+app.post('/checkpremium',(request, response) => {
+  const item = request.body
+  admin.database().ref("/subscription").orderByChild("email").equalTo(item.email.toLowerCase()).once("child_added", function(snapshot) {
+      if(snapshot.exists() && snapshot.val().customer){
+        response.json({exists: true});
+      }else{
+        response.json({exists: false});
+      }
+    });
+});
 app.get('/:email',(request, response) => {
 
   return response.json({exists: true, subscription: true});

@@ -39,6 +39,7 @@ class ButtonPanel extends React.Component {
     this.onFavouriteSelected = this.onFavouriteSelected.bind(this);
     this.onHistorySelected = this.onHistorySelected.bind(this);
     this.onTemplateSelected = this.onTemplateSelected.bind(this);
+    this.onReplaceAll = this.onReplaceAll.bind(this);
   }
 
   componentDidMount() {
@@ -87,6 +88,10 @@ class ButtonPanel extends React.Component {
     this.props.onFavouriteSelected(favourite);
   }
 
+  onReplaceAll(favourite) {
+    this.props.onReplaceAll(favourite);
+  }
+
   onHistorySelected(historyItem) {
     this.closePanels();
     this.props.onHistorySelected(historyItem);
@@ -104,7 +109,8 @@ class ButtonPanel extends React.Component {
         case this.TABS.favourites: return (
           <FavouritesPanel
             favourites={this.state.favourites}
-            onFavouriteSelected={this.onFavouriteSelected} />
+            onFavouriteSelected={this.onFavouriteSelected} 
+            onReplaceAll={this.onReplaceAll} />
         );
         case this.TABS.history: return (
           <HistoryPanel

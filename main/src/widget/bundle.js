@@ -3249,6 +3249,57 @@ var Storage = function () {
       });
     }
   }, {
+    key: 'bundleFavourites',
+    value: function bundleFavourites(searchStates) {
+      var _this6 = this;
+
+      if (this.dummy) return;
+      var searchHash = "bundle" + searchStates.map(function (state) {
+        // delete favourites[searchHash];
+        return _this6.hashSearchState_(state);
+      }).join("");
+      this.favouritesPromise = this.favouritesPromise.then(function (favourites) {
+        searchStates.forEach(function (state) {
+          delete favourites[_this6.hashSearchState_(state)];
+        });
+        favourites[searchHash] = searchStates;
+        // Sync storage
+        chrome.storage.local.set(_defineProperty({}, _this6.favouritesKey, favourites));
+        // Notify change
+        _this6.notifyFavouritesChanged_(favourites);
+
+        // Keep new object in memory
+        return favourites;
+      });
+    }
+  }, {
+    key: 'unbundleFavourites',
+    value: function unbundleFavourites(searchStates) {
+      var _this7 = this;
+
+      if (this.dummy) return;
+      var searchHash = "bundle" + searchStates.map(function (state) {
+        return _this7.hashSearchState_(state);
+      }).join("");
+      console.log(searchStates);
+
+      this.favouritesPromise = this.favouritesPromise.then(function (favourites) {
+        delete favourites[searchHash];
+        searchStates.forEach(function (state) {
+          console.log("state");
+          console.log(state);
+          favourites[_this7.hashSearchState_(state)] = state;
+        });
+        // Sync storage
+        chrome.storage.local.set(_defineProperty({}, _this7.favouritesKey, favourites));
+        // Notify change
+        _this7.notifyFavouritesChanged_(favourites);
+
+        // Keep new object in memory
+        return favourites;
+      });
+    }
+  }, {
     key: 'isAddedToFavourites',
     value: function isAddedToFavourites(searchState) {
       if (this.dummy) return Promise.resolve(false);
@@ -3261,7 +3312,7 @@ var Storage = function () {
   }, {
     key: 'addToTemplates',
     value: function addToTemplates(title, text) {
-      var _this6 = this;
+      var _this8 = this;
 
       if (this.dummy) return;
 
@@ -3269,9 +3320,9 @@ var Storage = function () {
       this.templatesPromise = this.templatesPromise.then(function (templates) {
         templates[templateHash] = { title: title, text: text };
         // Sync storage
-        chrome.storage.local.set(_defineProperty({}, _this6.templatesKey, templates));
+        chrome.storage.local.set(_defineProperty({}, _this8.templatesKey, templates));
         // Notify change
-        _this6.notifyTemplatesChanged_(templates);
+        _this8.notifyTemplatesChanged_(templates);
         // Keep new object in memory
         return templates;
       });
@@ -3279,14 +3330,14 @@ var Storage = function () {
   }, {
     key: 'removeTemplate',
     value: function removeTemplate(templateId) {
-      var _this7 = this;
+      var _this9 = this;
 
       if (this.dummy) return;
 
       this.templatesPromise = this.templatesPromise.then(function (templates) {
         delete templates[templateId];
-        chrome.storage.local.set(_defineProperty({}, _this7.templatesKey, templates));
-        _this7.notifyTemplatesChanged_(templates);
+        chrome.storage.local.set(_defineProperty({}, _this9.templatesKey, templates));
+        _this9.notifyTemplatesChanged_(templates);
         return templates;
       });
       return this.templatesPromise;
@@ -3300,7 +3351,7 @@ var Storage = function () {
   }, {
     key: 'updateTemplate',
     value: function updateTemplate(templateIdOld, titleNew, textNew) {
-      var _this8 = this;
+      var _this10 = this;
 
       if (this.dummy) return;
 
@@ -3309,7 +3360,7 @@ var Storage = function () {
         delete templates[templateIdOld];
         templates[templateHash] = { title: titleNew, text: textNew };
         // Sync storage
-        chrome.storage.local.set(_defineProperty({}, _this8.templatesKey, templates));
+        chrome.storage.local.set(_defineProperty({}, _this10.templatesKey, templates));
         // Keep new object in memory
         return templates;
       });
@@ -23531,6 +23582,8 @@ var Main = function (_React$Component) {
     _this.onHistorySelecedInPanel = _this.onHistorySelecedInPanel.bind(_this);
     _this.onTemplateSelectedInPanel = _this.onTemplateSelectedInPanel.bind(_this);
     _this.handleContentScriptApiResponse = _this.handleContentScriptApiResponse.bind(_this);
+    _this.onReplaceAllInPanel = _this.onReplaceAllInPanel.bind(_this);
+    _this.openLeaveReview = _this.openLeaveReview.bind(_this);
 
     // Register content-script response listener
     _ConnectionApi2.default.addResponseHandler(_this.handleContentScriptApiResponse);
@@ -23568,6 +23621,12 @@ var Main = function (_React$Component) {
         _this2.updateStateFromSaved(prevSearchState, /* saveSearchState */false);
       });
       _Analytics2.default.sendPageView("search");
+    }
+  }, {
+    key: 'openLeaveReview',
+    value: function openLeaveReview(e) {
+      e.preventDefault();
+      chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/find-replace-for-text-edi/jajhdmnpiocpbpnlpejbgmpijgmoknnl" });
     }
   }, {
     key: 'updateStateFromSaved',
@@ -23646,6 +23705,23 @@ var Main = function (_React$Component) {
     key: 'onFavouriteSelectedInPanel',
     value: function onFavouriteSelectedInPanel(favourite) {
       this.updateStateFromSaved(favourite, /* saveSearchState */true);
+    }
+  }, {
+    key: 'onReplaceAllInPanel',
+    value: function onReplaceAllInPanel(savedPartialState) {
+      _ConnectionApi2.default.updateSearch({
+        query: savedPartialState.findTextInput,
+        useRegex: savedPartialState.useRegexInput,
+        matchCase: savedPartialState.matchCaseInput,
+        wholeWords: savedPartialState.wholeWordsInput,
+        limitToSelection: savedPartialState.limitToSelectionInput,
+        includeOneLineFields: savedPartialState.includeOneLineFieldsInput,
+        replaceText: savedPartialState.replaceTextInput
+      });
+      _ConnectionApi2.default.replaceAll({
+        replaceText: savedPartialState.replaceTextInput
+      });
+      _Storage2.default.addToHistory(this.getSearchStateForHistory());
     }
   }, {
     key: 'onHistorySelecedInPanel',
@@ -23979,12 +24055,18 @@ var Main = function (_React$Component) {
             )
           ),
           this.state.advancedSearchExpanded && this.state.useRegexInput && !this.state.contentScriptError.invalidRegex && this.state.contentScriptSearch.searchCount > 0 && _react2.default.createElement(_AdvancedSearchInfo2.default, {
-            matchInfo: this.state.contentScriptSearch.currentMatch })
+            matchInfo: this.state.contentScriptSearch.currentMatch }),
+          _react2.default.createElement(
+            'p',
+            { className: 'leavereview', onClick: this.openLeaveReview },
+            'Love this extension? Please leave us a review!'
+          )
         ),
         _react2.default.createElement(_ButtonPanel2.default, {
           onPanelOpened: this.onButtonsPanelOpened,
           onPanelClosed: this.onButtonsPanelClosed,
           onFavouriteSelected: this.onFavouriteSelectedInPanel,
+          onReplaceAll: this.onReplaceAllInPanel,
           onHistorySelected: this.onHistorySelecedInPanel,
           onTemplateSelected: this.onTemplateSelectedInPanel })
       );
@@ -24205,6 +24287,7 @@ var ButtonPanel = function (_React$Component) {
     _this.onFavouriteSelected = _this.onFavouriteSelected.bind(_this);
     _this.onHistorySelected = _this.onHistorySelected.bind(_this);
     _this.onTemplateSelected = _this.onTemplateSelected.bind(_this);
+    _this.onReplaceAll = _this.onReplaceAll.bind(_this);
     return _this;
   }
 
@@ -24261,6 +24344,11 @@ var ButtonPanel = function (_React$Component) {
       this.props.onFavouriteSelected(favourite);
     }
   }, {
+    key: 'onReplaceAll',
+    value: function onReplaceAll(favourite) {
+      this.props.onReplaceAll(favourite);
+    }
+  }, {
     key: 'onHistorySelected',
     value: function onHistorySelected(historyItem) {
       this.closePanels();
@@ -24283,7 +24371,8 @@ var ButtonPanel = function (_React$Component) {
           case _this2.TABS.favourites:
             return _react2.default.createElement(_FavouritesPanel2.default, {
               favourites: _this2.state.favourites,
-              onFavouriteSelected: _this2.onFavouriteSelected });
+              onFavouriteSelected: _this2.onFavouriteSelected,
+              onReplaceAll: _this2.onReplaceAll });
           case _this2.TABS.history:
             return _react2.default.createElement(_HistoryPanel2.default, {
               history: _this2.state.history,
@@ -24374,14 +24463,21 @@ var FavouritesPanel = function (_React$Component) {
 
     _this.state = {
       email: null,
-      allow: false,
+      premium: false,
+      bundleCreation: false,
+      checkedItem: [],
       redirecting: false
     };
     _this.handleFavouriteRemoved = _this.handleFavouriteRemoved.bind(_this);
     _this.handleFavouriteSelected = _this.handleFavouriteSelected.bind(_this);
-    _this.handleMonthlyPay = _this.handleMonthlyPay.bind(_this);
+    _this.handlePay = _this.handlePay.bind(_this);
     // this.handleYearlyPay = this.handleYearlyPay.bind(this);
     _this.cancelPay = _this.cancelPay.bind(_this);
+    _this.toggleBundleCreation = _this.toggleBundleCreation.bind(_this);
+    _this.handleCheckbox = _this.handleCheckbox.bind(_this);
+    _this.handleBundleCreation = _this.handleBundleCreation.bind(_this);
+    _this.handleReplaceAll = _this.handleReplaceAll.bind(_this);
+    _this.handleReplaceAllBundle = _this.handleReplaceAllBundle.bind(_this);
     return _this;
   }
 
@@ -24391,31 +24487,63 @@ var FavouritesPanel = function (_React$Component) {
       var _this2 = this;
 
       var self = this;
-      chrome.storage.local.get(["subscribe"], function (data) {
-        _this2.setState({ allow: data.subscribe });
+      console.log(this.props.favourites);
+
+      chrome.storage.local.get(["premium"], function (data) {
+        _this2.setState({ premium: data.premium });
       });
       window.chrome.identity.getProfileUserInfo(function (userInfo) {
         self.setState({ email: userInfo.email });
-        fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/' + userInfo.email).then(function (r) {
-          return r.json();
-        }).then(function (result) {
-          // Result now contains the response text, do what you want...
-          console.log(result);
-          if (result.exists && result.subscription) {
-            self.setState({ allow: true, subscription: result.subscription });
-            chrome.storage.local.set({ "subscribe": true });
-          } else {
-            self.setState({ allow: false });
-            chrome.storage.local.set({ "subscribe": false });
-          }
-          console.log("email stored");
-        });
+        console.log("email:" + userInfo.email);
+        if (userInfo.email) {
+          fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/checkpremium', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userInfo.email }) }).then(function (r) {
+            return r.json();
+          }).then(function (result) {
+            // Result now contains the response text, do what you want...
+            console.log(result);
+            if (result.exists) {
+              self.setState({ premium: true });
+              chrome.storage.local.set({ "premium": true });
+            } else {
+              self.setState({ premium: false });
+              chrome.storage.local.set({ "premium": false });
+            }
+            console.log("email stored");
+          });
+        } else {
+          self.setState({ premium: false });
+          chrome.storage.local.set({ "premium": false });
+        }
       });
     }
   }, {
     key: 'handleFavouriteSelected',
     value: function handleFavouriteSelected(id) {
-      this.props.onFavouriteSelected(this.props.favourites[id]);
+      if (!this.state.bundleCreation) {
+        this.props.onFavouriteSelected(this.props.favourites[id]);
+      }
+    }
+  }, {
+    key: 'handleReplaceAll',
+    value: function handleReplaceAll(id) {
+      if (!this.state.bundleCreation) {
+        this.props.onReplaceAll(this.props.favourites[id]);
+      }
+    }
+  }, {
+    key: 'handleReplaceAllBundle',
+    value: function handleReplaceAllBundle(id) {
+      var _this3 = this;
+
+      if (!this.state.bundleCreation && this.props.favourites[id] && this.props.favourites[id].length > 1) {
+        this.props.favourites[id].map(function (fav) {
+          console.log(fav);
+          _this3.props.onReplaceAll(fav);
+        });
+      }
     }
   }, {
     key: 'handleFavouriteRemoved',
@@ -24423,8 +24551,14 @@ var FavouritesPanel = function (_React$Component) {
       _Storage2.default.setInFavourites(this.props.favourites[id], /* delete */true);
     }
   }, {
-    key: 'handleMonthlyPay',
-    value: function handleMonthlyPay(e) {
+    key: 'handleunBundle',
+    value: function handleunBundle(id) {
+      console.log(this.props.favourites[id]);
+      _Storage2.default.unbundleFavourites(this.props.favourites[id]);
+    }
+  }, {
+    key: 'handlePay',
+    value: function handlePay(e) {
       e.preventDefault();
       this.setState({ redirecting: true });
       if (this.state.email && this.state.email !== "") {
@@ -24444,7 +24578,7 @@ var FavouritesPanel = function (_React$Component) {
   }, {
     key: 'cancelPay',
     value: function cancelPay(e) {
-      var _this3 = this;
+      var _this4 = this;
 
       e.preventDefault();
       if (this.state.subscription && this.state.subscription) {
@@ -24452,7 +24586,7 @@ var FavouritesPanel = function (_React$Component) {
           return r.json();
         }).then(function (result) {
           if (result.canceled) {
-            _this3.setState({ subscription: result.confirmation });
+            _this4.setState({ subscription: result.confirmation });
           } else {
             console.log(result.err);
           }
@@ -24460,9 +24594,56 @@ var FavouritesPanel = function (_React$Component) {
       }
     }
   }, {
+    key: 'toggleBundleCreation',
+    value: function toggleBundleCreation(e) {
+      e.preventDefault();
+      console.log(this.state.bundleCreation);
+      this.setState({ bundleCreation: !this.state.bundleCreation, checkedItem: Object.keys(this.props.favourites).filter(function (id) {
+          return id.substr(0, 6) !== "bundle";
+        }).map(function (id) {
+          return false;
+        }) });
+    }
+  }, {
+    key: 'handleCheckbox',
+    value: function handleCheckbox(e) {
+      var newCheckedItem = this.state.checkedItem.map(function (item, idx) {
+        if (idx == e.target.name) {
+          return !item;
+        } else {
+          return item;
+        }
+      });
+      this.setState({ checkedItem: newCheckedItem });
+    }
+  }, {
+    key: 'handleBundleCreation',
+    value: function handleBundleCreation(e) {
+      var _this5 = this;
+
+      e.preventDefault();
+      console.log(this.state.checkedItem);
+      var bundlelist = Object.keys(this.props.favourites).filter(function (id) {
+        return id.substr(0, 6) !== "bundle";
+      }).sort().filter(function (id, idx) {
+        return _this5.state.checkedItem[idx];
+      });
+      console.log(bundlelist);
+      var bundle = bundlelist.map(function (id, idx) {
+        return _this5.props.favourites[id];
+      });
+      console.log(bundle);
+      if (bundle && bundle.length > 1) {
+        _Storage2.default.bundleFavourites(bundle);
+        this.setState({ bundleCreation: false });
+      } else {
+        this.setState({ bundleCreation: false });
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var _this4 = this;
+      var _this6 = this;
 
       var noSavedFavouritesMessage = _react2.default.createElement(
         'div',
@@ -24475,43 +24656,104 @@ var FavouritesPanel = function (_React$Component) {
         _react2.default.createElement(
           'div',
           { className: 'panel-title' },
-          _react2.default.createElement(_reactFontawesome2.default, { name: 'star', fixedWidth: true }),
-          ' Favourites'
-        ),
-        !this.state.email && _react2.default.createElement(
-          'p',
-          null,
-          'Please login Chrome to enable this feature.'
-        ),
-        !this.state.allow && this.state.email && _react2.default.createElement(
-          'div',
-          null,
-          !this.state.redirecting && _react2.default.createElement(
+          _react2.default.createElement(
             'div',
             null,
-            _react2.default.createElement(
-              'p',
-              { className: 'pay-text' },
-              'Upgrade your account to use this feature. Upgrade cost $3.99 per month.'
-            ),
-            _react2.default.createElement(
+            _react2.default.createElement(_reactFontawesome2.default, { name: 'star', fixedWidth: true }),
+            ' Favourites'
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            this.state.premium && _react2.default.createElement(
               'button',
-              { onClick: this.handleMonthlyPay, className: 'pay-button' },
-              'Pay Monthly'
+              { className: 'small-button', onClick: this.toggleBundleCreation },
+              this.state.bundleCreation ? "Cancel" : "Choose items to bundle"
+            ),
+            this.state.premium && this.state.bundleCreation && _react2.default.createElement(
+              'button',
+              { className: 'small-button small-button--red', onClick: this.handleBundleCreation },
+              'Create bundle'
             )
           ),
-          this.state.redirecting && _react2.default.createElement(
+          !this.state.premium && this.state.email && _react2.default.createElement(
             'p',
-            { className: 'pay-text' },
-            'Redirecting to Checkout page please dont close extension ... '
+            { onClick: this.handlePay, className: 'leavereview' },
+            'Upgrade to run multiple F&R queries with 1 click'
+          ),
+          !this.state.premium && !this.state.email && _react2.default.createElement(
+            'p',
+            { className: 'logintext' },
+            'Login Chrome to experience premuim features.'
           )
         ),
-        this.state.allow && _react2.default.createElement(
+        _react2.default.createElement(
           'div',
           null,
           Object.keys(this.props.favourites).length == 0 && noSavedFavouritesMessage,
-          Object.keys(this.props.favourites).sort().map(function (id) {
-            var _props$favourites$id = _this4.props.favourites[id],
+          this.state.premium && Object.keys(this.props.favourites).filter(function (id) {
+            return id.substr(0, 6) === "bundle";
+          }).sort().map(function (id, idx) {
+            var textRender = _this6.props.favourites[id].map(function (item, idx) {
+              return _react2.default.createElement(
+                'span',
+                null,
+                _react2.default.createElement(
+                  'span',
+                  null,
+                  item.findTextInput
+                ),
+                _react2.default.createElement(_reactFontawesome2.default, { name: 'long-arrow-right' }),
+                _react2.default.createElement(
+                  'span',
+                  null,
+                  item.replaceTextInput,
+                  ' '
+                )
+              );
+            });
+            return _react2.default.createElement(
+              'div',
+              { className: 'favourites-list-item', key: id,
+                onClick: function onClick() {
+                  return _this6.handleFavouriteSelected(id);
+                } },
+              _react2.default.createElement(
+                'span',
+                null,
+                _react2.default.createElement(
+                  'b',
+                  null,
+                  'Bundle : '
+                ),
+                textRender
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                _this6.state.premium && _react2.default.createElement(
+                  'button',
+                  { className: 'small-button small-button--red', onClick: function onClick(e) {
+                      e.stopPropagation();
+                      _this6.handleReplaceAllBundle(id);
+                    } },
+                  'Run'
+                ),
+                _react2.default.createElement(
+                  'button',
+                  { className: 'small-button', onClick: function onClick(e) {
+                      e.stopPropagation();
+                      _this6.handleunBundle(id);
+                    } },
+                  'Unbundle'
+                )
+              )
+            );
+          }),
+          Object.keys(this.props.favourites).filter(function (id) {
+            return id.substr(0, 6) !== "bundle";
+          }).sort().map(function (id, idx) {
+            var _props$favourites$id = _this6.props.favourites[id],
                 findTextInput = _props$favourites$id.findTextInput,
                 replaceTextInput = _props$favourites$id.replaceTextInput;
 
@@ -24519,11 +24761,12 @@ var FavouritesPanel = function (_React$Component) {
               'div',
               { className: 'favourites-list-item', key: id,
                 onClick: function onClick() {
-                  return _this4.handleFavouriteSelected(id);
+                  return _this6.handleFavouriteSelected(id);
                 } },
               _react2.default.createElement(
                 'span',
                 null,
+                _this6.state.bundleCreation && _react2.default.createElement('input', { type: 'checkbox', name: idx, checked: _this6.state.checkedItem[idx], onChange: _this6.handleCheckbox }),
                 _react2.default.createElement(
                   'span',
                   null,
@@ -24541,10 +24784,18 @@ var FavouritesPanel = function (_React$Component) {
               _react2.default.createElement(
                 'span',
                 null,
+                _react2.default.createElement(
+                  'button',
+                  { className: 'small-button', onClick: function onClick(e) {
+                      e.stopPropagation();
+                      _this6.handleReplaceAll(id);
+                    } },
+                  'Run'
+                ),
                 _react2.default.createElement(_reactFontawesome2.default, { className: 'favourites-list-item-remove', name: 'times',
                   onClick: function onClick(e) {
                     e.stopPropagation();
-                    _this4.handleFavouriteRemoved(id);
+                    _this6.handleFavouriteRemoved(id);
                   } })
               )
             );

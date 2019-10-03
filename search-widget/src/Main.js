@@ -52,6 +52,8 @@ class Main extends React.Component {
     this.onHistorySelecedInPanel = this.onHistorySelecedInPanel.bind(this);
     this.onTemplateSelectedInPanel = this.onTemplateSelectedInPanel.bind(this);
     this.handleContentScriptApiResponse = this.handleContentScriptApiResponse.bind(this);
+    this.onReplaceAllInPanel = this.onReplaceAllInPanel.bind(this);
+    this.openLeaveReview = this.openLeaveReview.bind(this)
 
     // Register content-script response listener
     ConnectionApi.addResponseHandler(this.handleContentScriptApiResponse);
@@ -81,7 +83,10 @@ class Main extends React.Component {
     });
     Analytics.sendPageView("search");
   }
-
+  openLeaveReview(e){
+    e.preventDefault();
+    chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/find-replace-for-text-edi/jajhdmnpiocpbpnlpejbgmpijgmoknnl" });
+  }
   updateStateFromSaved(savedPartialState, saveSearchState) {
     this.setState(savedPartialState, () => {
       if (savedPartialState.findTextInput) {
@@ -149,6 +154,22 @@ class Main extends React.Component {
 
   onFavouriteSelectedInPanel(favourite) {
     this.updateStateFromSaved(favourite, /* saveSearchState */ true);
+  }
+
+  onReplaceAllInPanel(savedPartialState) {
+    ConnectionApi.updateSearch({
+      query: savedPartialState.findTextInput,
+      useRegex: savedPartialState.useRegexInput,
+      matchCase: savedPartialState.matchCaseInput,
+      wholeWords: savedPartialState.wholeWordsInput,
+      limitToSelection: savedPartialState.limitToSelectionInput,
+      includeOneLineFields: savedPartialState.includeOneLineFieldsInput,
+      replaceText: savedPartialState.replaceTextInput
+    });
+    ConnectionApi.replaceAll({
+      replaceText: savedPartialState.replaceTextInput
+    });
+    Storage.addToHistory(this.getSearchStateForHistory());
   }
 
   onHistorySelecedInPanel(history) {
@@ -447,12 +468,14 @@ class Main extends React.Component {
             <AdvancedSearchInfo
               matchInfo={this.state.contentScriptSearch.currentMatch} />
           }
+          <p className="leavereview" onClick={this.openLeaveReview}>Love this extension? Please leave us a review!</p>
         </div>
 
         <ButtonPanel
           onPanelOpened={this.onButtonsPanelOpened}
           onPanelClosed={this.onButtonsPanelClosed}
           onFavouriteSelected={this.onFavouriteSelectedInPanel}
+          onReplaceAll={this.onReplaceAllInPanel}
           onHistorySelected={this.onHistorySelecedInPanel}
           onTemplateSelected={this.onTemplateSelectedInPanel} />
       </div>

@@ -147,6 +147,8 @@ input, textarea {
     font-weight: bold;
     padding: 1em 1em 0;
     margin-bottom: 0.5em;
+    display: flex;
+    justify-content: space-between;
   }
   .pay-text {
     font-weight: bold;
@@ -256,7 +258,12 @@ input, textarea {
     top: 0;
   }
 
-  .favourites-list-item-remove,
+  .favourites-list-item-remove{
+    display: inline-block;
+    cursor: pointer;
+    color: var(--col-text-light);
+    font-size: 1.3em;
+  }
   .templates-list-item-remove,
   .templates-list-item-edit,
   .templates-list-item-lock,
@@ -718,4 +725,38 @@ input, textarea {
   .switch-input:checked ~ .switch-handle {
     left: 40px;
     box-shadow: -1px 1px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .small-button{
+    cursor: pointer;
+    font-size: 90%;
+    border: 1px solid #4d4d4d;
+    padding: 2px 5px;
+    border-radius: 5px;
+    color: #4d4d4d;
+    background-color: transparent;
+    margin-right: 5px;
+
+
+  }
+  .small-button.small-button--blue{
+    border-color: rgb(105, 105, 245);
+    color: rgb(105, 105, 245); 
+  }  
+  .small-button.small-button--red{
+    border-color: rgb(255, 97, 97);
+    color: rgb(255, 97, 97); 
+  }
+  .leavereview{
+    text-align: right;
+    color: red;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0;
+  }
+  .logintext{
+    text-align: right;
+    color: #888;
+    margin: 0;
+
   }

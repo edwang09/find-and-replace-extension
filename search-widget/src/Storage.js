@@ -151,6 +151,58 @@ class Storage {
     });
   }
 
+  bundleFavourites(searchStates) {
+    if (this.dummy) return;
+    const searchHash = "bundle" + searchStates.map(state=>{
+      // delete favourites[searchHash];
+      return this.hashSearchState_(state)
+    }).join("");
+    this.favouritesPromise = this.favouritesPromise.then(favourites => {
+      searchStates.forEach(state=>{
+        delete favourites[this.hashSearchState_(state)];
+      })
+      favourites[searchHash] = searchStates;
+      // Sync storage
+      chrome.storage.local.set({
+        [this.favouritesKey]: favourites
+      });
+      // Notify change
+      this.notifyFavouritesChanged_(favourites);
+
+      // Keep new object in memory
+      return favourites;
+    });
+  }
+
+  unbundleFavourites(searchStates) {
+    if (this.dummy) return;
+    const searchHash = "bundle" + searchStates.map(state=>{
+      return this.hashSearchState_(state)
+    }).join("");
+    console.log(searchStates)
+
+    this.favouritesPromise = this.favouritesPromise.then(favourites => {
+      delete favourites[searchHash];
+      searchStates.forEach(state=>{
+        console.log("state")
+        console.log(state)
+        favourites[this.hashSearchState_(state)] = state;
+      })
+      // Sync storage
+      chrome.storage.local.set({
+        [this.favouritesKey]: favourites
+      });
+      // Notify change
+      this.notifyFavouritesChanged_(favourites);
+
+      // Keep new object in memory
+      return favourites;
+    });
+  }
+
+
+
+
   isAddedToFavourites(searchState) {
     if (this.dummy) return Promise.resolve(false);
 
