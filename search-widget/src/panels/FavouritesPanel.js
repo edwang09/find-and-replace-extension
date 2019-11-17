@@ -2,6 +2,7 @@ import React from 'react';
 
 import FontAwesome from 'react-fontawesome';
 import Storage from '../Storage';
+import Analytics from '../Analytics';
 
 class FavouritesPanel extends React.Component {
   constructor(props) {
@@ -33,29 +34,6 @@ class FavouritesPanel extends React.Component {
     });
     window.chrome.identity.getProfileUserInfo(function(userInfo) {
       self.setState({email:userInfo.email})
-      console.log("email:" + userInfo.email)
-      if (userInfo.email){
-        fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/checkpremium', {
-          method : "POST", 
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({email: userInfo.email})})
-          .then(r => r.json()).then(result => {
-            // Result now contains the response text, do what you want...
-            console.log(result)
-            if (result.exists ){
-              self.setState({premium:true})
-              chrome.storage.local.set({"premium":true});
-            }else{
-              self.setState({premium:false})
-                chrome.storage.local.set({"premium":false});
-            }
-            console.log("email stored")
-        })
-      }else{
-        self.setState({premium:false})
-        chrome.storage.local.set({"premium":false});
-      }
-
     })
  
   }
@@ -88,6 +66,7 @@ class FavouritesPanel extends React.Component {
   }
   handlePay(e){
     e.preventDefault()
+    Analytics.sendEvent("payment-click", this.state.email)
     this.setState({redirecting:true})
     if (this.state.email && this.state.email !== ""){
       const redirectURL = "https://pay-gate-for-find-replace.firebaseapp.com/checkout?ref=" + this.state.email
@@ -140,7 +119,7 @@ class FavouritesPanel extends React.Component {
     console.log(this.state.checkedItem)
     const bundlelist = Object.keys(this.props.favourites)
     .filter(id=> id.substr(0,6)!=="bundle")
-    .sort()
+    // .sort()
     .filter((id, idx)=>{
       return this.state.checkedItem[idx]
     })
@@ -202,7 +181,9 @@ class FavouritesPanel extends React.Component {
               );
             }
           )}
-          {Object.keys(this.props.favourites).filter(id=> id.substr(0,6)!=="bundle").sort().map((id, idx) => {
+          {Object.keys(this.props.favourites).filter(id=> id.substr(0,6)!=="bundle")
+          // .sort()
+          .map((id, idx) => {
             const { findTextInput, replaceTextInput } = this.props.favourites[id];
               return (
                 <div className="favourites-list-item" key={id}

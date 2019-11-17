@@ -749,7 +749,16 @@ input, textarea {
   }
   .leavereview{
     text-align: right;
+    text-decoration: underline;
     color: red;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0;
+  }
+  .upgradeaccount{
+    text-decoration: underline;
+    color: red;
+    font-size: 80%;
     font-weight: bold;
     cursor: pointer;
     margin: 0;

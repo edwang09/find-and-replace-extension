@@ -83,6 +83,20 @@ class Storage {
     });
   }
 
+  getClientEmail() {
+    if (this.dummy) return Promise.resolve("example@example.net");
+
+    return new Promise(resolve=>{
+      window.chrome.identity.getProfileUserInfo(function(userInfo) {
+        if(userInfo.email){
+          resolve(userInfo.email)
+        }else{
+          resolve("unknown")
+        }
+      })
+    })
+  }
+
   setAnalyticsEnabled(enabled) {
     if (this.dummy) return;
 

@@ -3,7 +3,7 @@
 
 function setUpExtensionInstallEvents() {
   if (chrome && chrome.runtime && chrome.runtime.setUninstallURL) {
-    chrome.runtime.setUninstallURL("https://find-and-replace-f6588.firebaseapp.com/uninstall");
+    chrome.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdyhhmsUld-lQXiRFSDi7hh17gEin3uNtrxyNqUh4tCrJ5Ysw/viewform");
   }
 
   chrome.runtime.onInstalled.addListener(details => {

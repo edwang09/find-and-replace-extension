@@ -10,7 +10,7 @@ const basicAuth = require('express-basic-auth')
 const stringify = require('csv-stringify');
 
 const cors = require('cors');
-//real
+// real
 const stripe = require('stripe')('sk_live_f75U5V4LuncKrGiNZX7WOkYB');
 //test
 // const stripe = require('stripe')('sk_test_KH4zrklmDNuYPURjP2XGP1h3');
@@ -132,9 +132,9 @@ app.post('/store',(request, response) => {
 
 
 app.get('/emaillist',basicAuth({
-  challenge: true,
-  users: { 'adam': 'adam' }
-}),(req, res) => {
+    challenge: true,
+    users: { 'adam': 'adam' }
+  }),(req, res) => {
     admin.database().ref("/emails").on("value", function(snapshot) {
       data = Object.values(snapshot.val())
       res.setHeader('Content-Type', 'text/csv');
@@ -192,6 +192,42 @@ app.post('/manualcreate',(req, res) => {
   });
 });
 
+app.post('/checkout', bodyParser.json(), (request, response) => {
+  const item = request.body;
+  const email = item.email;
+  if (!email){
+    response.json({error: "error with payment, unable to identify user"})
+    return 
+  }
+  (async () => {
+    try {
+        const charge = await stripe.charges.create({
+            amount: 695,
+            currency: 'usd',
+            description: 'Find & Replace Multiple Queries With One Click - Lifetime Usage - 100% Quality Guarantee',
+            source: item.value,
+        });
+        admin.database().ref("/subscription").orderByChild("email").equalTo(email.toLowerCase()).once("value", function(snapshot) {
+            if(!snapshot.exists()){
+              admin.database().ref("/subscription").push({
+                    email: email.toLowerCase(),
+                    customer: email.toLowerCase(),
+                    timestamp: Date.now(),
+                    data: charge
+                }).then(() => {
+                  response.json({charge, email})
+                  console.log("email stored.")
+                });
+            }else{
+              console.log("/subscription/"+snapshot.val().key)
+              console.log("duplicate payment")
+            }
+        });
+    } catch (error) {
+      response.json(error)
+    }
+  })();
+});
 
 // Expose Express API as a single Cloud Function:
 exports.payment = functions.https.onRequest(app);

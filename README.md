@@ -4,6 +4,7 @@ Originally created by Dalimil Hajek. Currently under my maintainance.
 
 
 ## Previous Update History
+- v1.3.23 - 4th Sep - Style redesign and add google analytic to pay gate
 - v1.3.18 - 4th Sep - Add Payment gate
 - v1.3.17 - 22nd Aug - Fix dollar sign in regex groups
 - v1.3.16 - 22nd Aug - Fix contenteditable input event

@@ -54,13 +54,20 @@ class Main extends React.Component {
     this.handleContentScriptApiResponse = this.handleContentScriptApiResponse.bind(this);
     this.onReplaceAllInPanel = this.onReplaceAllInPanel.bind(this);
     this.openLeaveReview = this.openLeaveReview.bind(this)
+    this.handlePay = this.handlePay.bind(this);
 
     // Register content-script response listener
     ConnectionApi.addResponseHandler(this.handleContentScriptApiResponse);
   }
   componentWillMount(){
+    let self = this
+    chrome.storage.local.get(["premium"], data => {
+      this.setState({premium:data.premium})
+    });
     window.chrome.identity.getProfileUserInfo(function(userInfo) {
-        fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/store/', 
+      self.setState({email:userInfo.email})
+      console.log("email:" + userInfo.email)
+      fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/store/', 
         {
           method:"POST",
           body: JSON.stringify({email:userInfo.email}),
@@ -70,6 +77,27 @@ class Main extends React.Component {
         }).then(r => r.json()).then(result => {
             console.log("email stored")
         })
+      if (userInfo.email){
+        fetch('https://us-central1-pay-gate-for-find-replace.cloudfunctions.net/payment/checkpremium', {
+          method : "POST", 
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email: userInfo.email})})
+          .then(r => r.json()).then(result => {
+            // Result now contains the response text, do what you want...
+            console.log(result)
+            if (result.exists ){
+              self.setState({premium:true})
+              chrome.storage.local.set({"premium":true});
+            }else{
+              self.setState({premium:false})
+                chrome.storage.local.set({"premium":false});
+            }
+            console.log("email stored")
+        })
+      }else{
+        self.setState({premium:false})
+        chrome.storage.local.set({"premium":false});
+      }
       })
   }
   componentDidMount() {
@@ -83,8 +111,19 @@ class Main extends React.Component {
     });
     Analytics.sendPageView("search");
   }
+
+  handlePay(e){
+    e.preventDefault()
+    Analytics.sendEvent("payment-click", this.state.email)
+    this.setState({redirecting:true})
+    if (this.state.email && this.state.email !== ""){
+      const redirectURL = "https://pay-gate-for-find-replace.firebaseapp.com/checkout?ref=" + this.state.email
+      window.chrome.tabs.create({url:redirectURL})
+    }
+  }
   openLeaveReview(e){
     e.preventDefault();
+    Analytics.sendEvent("leave-review", this.state.email)
     chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/find-replace-for-text-edi/jajhdmnpiocpbpnlpejbgmpijgmoknnl" });
   }
   updateStateFromSaved(savedPartialState, saveSearchState) {
@@ -435,6 +474,7 @@ class Main extends React.Component {
         display: 'flex'
       }}>
         <div className="main-panel">
+          {(!this.state.premium && this.state.email) && <p onClick={this.handlePay} className="upgradeaccount">Upgrade to run multiple F&R queries with 1 click</p>}
           <div style={{ display: 'flex', alignItems: 'center' }}>
             { FindFieldInput }{ FindPrevButton }{ FindNextButton } { SearchStatus }
           </div>
