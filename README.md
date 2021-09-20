@@ -2,6 +2,9 @@
 RegEx Search & Replace Extension for Chrome and Firefox browsers.
 Originally created by Dalimil Hajek. Currently under my maintainance.
 
+# Product link
+
+https://chrome.google.com/webstore/detail/find-replace-for-text-edi/jajhdmnpiocpbpnlpejbgmpijgmoknnl?hl=en
 
 ## Previous Update History
 - v1.3.23 - 4th Sep - Style redesign and add google analytic to pay gate
